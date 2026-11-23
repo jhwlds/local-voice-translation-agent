@@ -8,7 +8,7 @@ Build a local English-to-Korean speech translation app: transcribe English audio
 
 ## Planned pipeline
 
-1. **Whisper** (MLX) — speech to English text  
+1. **Whisper** (OpenAI Whisper Small, mlx-community/whisper-small-mlx) — speech to English text  
 2. **A9 or NLLB** — English text to Korean text  
 3. **Qwen3-TTS** — Korean text to speech  
 4. **Gradio** — upload audio and hear the result  
