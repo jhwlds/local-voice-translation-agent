@@ -3,3 +3,5 @@ __pycache__/
 .DS_Store
 test.m4a
 test.txt
+tts/reference.wav
+tts/output/

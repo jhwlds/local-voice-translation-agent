@@ -1,27 +1,85 @@
 # cs479-final
 
-English speech in, Korean speech out — runs fully on your Mac, no cloud APIs.
+Local English-to-Korean speech translation — everything runs on my Mac, no cloud APIs.
+
+Tested on an M3 MacBook Air (24GB RAM).
 
 ## Goal
 
-Build a local English-to-Korean speech translation app: transcribe English audio, translate to Korean, synthesize Korean speech, and wrap it in a simple Gradio UI.
+Take English audio, turn it into Korean speech: transcribe → translate → TTS. Later, wrap the steps in a Gradio UI.
 
-## Planned pipeline
+## Pipeline
 
-1. **Whisper** (OpenAI Whisper Small, mlx-community/whisper-small-mlx) — speech to English text  
-2. **A9 or NLLB** — English text to Korean text  
-3. **Qwen3-TTS** — Korean text to speech  
-4. **Gradio** — upload audio and hear the result  
+1. **Whisper Small (MLX)** — English audio → English text  
+2. **Translation** — English text → Korean text  
+   - **NLLB-200 distilled 600M** (tested, PyTorch MPS)  
+   - **A9 Transformer** (planned alternative to NLLB)  
+3. **Qwen3-TTS 1.7B Base (8-bit)** — Korean text → audio (voice clone from a reference recording)  
+4. **Gradio** — web UI to run the full pipeline (not built yet)
 
 ## Requirements
 
 - Apple Silicon Mac  
 - Python 3.11  
 - [uv](https://docs.astral.sh/uv/)  
-- FFmpeg (not a Python package — install with Homebrew)
+- FFmpeg (`brew install ffmpeg`)
 
-## Setup
+You need internet access the first time you run each step so models can download from Hugging Face; after that, inference stays local.
+
+## Setup (two Python environments)
+
+Whisper and NLLB share the main project. Qwen3-TTS uses a separate `tts/` project because it depends on MLX-Audio.
+
+**Main project (Whisper + NLLB):**
 
 ```bash
 uv sync --locked
-brew install ffmpeg
+```
+
+**TTS project (MLX-Audio):**
+
+```bash
+uv sync --project tts --locked
+```
+
+## Local tests
+
+### 1. Whisper
+
+Put a short English clip at `test.m4a` in the project root (local only, gitignored):
+
+```bash
+uv run mlx_whisper test.m4a --model mlx-community/whisper-small-mlx --language en
+```
+
+### 2. NLLB
+
+```bash
+uv run python translate.py
+```
+
+Prints English input and Korean translation (model loads on MPS).
+
+### 3. Qwen3-TTS
+
+Place your English reference clip at `tts/reference.wav` (gitignored). The `--ref_text` should match what is actually spoken in that recording. Example Korean text from a successful run:
+
+```bash
+uv run --project tts mlx_audio.tts.generate \
+  --model mlx-community/Qwen3-TTS-12Hz-1.7B-Base-8bit \
+  --text "안녕하세요. 저는 호원입니다. 이것은 제 번역 프로젝트의 테스트입니다." \
+  --ref_audio tts/reference.wav \
+  --ref_text "Hello, my name is Ho-Won. This is testing testing. Thank you." \
+  --lang_code Korean \
+  --output_path tts/output
+```
+
+Output: `tts/output/audio_000.wav`.
+
+## Progress
+
+- [x] Whisper Small (MLX)  
+- [x] NLLB-200 distilled 600M (MPS)  
+- [x] Qwen3-TTS 1.7B Base 8-bit (reference voice)  
+- [ ] A9 Transformer  
+- [ ] Gradio app  
