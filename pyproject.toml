@@ -3,6 +3,7 @@ name = "cs479-final"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
+    "gradio>=5,<6",
     "mlx-whisper>=0.4.3",
     "sentencepiece>=0.2.3",
     "transformers>=4.45,<5",
