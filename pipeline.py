@@ -6,7 +6,7 @@ from translate import translate
 AUDIO = "test.m4a"
 WHISPER = "mlx-community/whisper-small-mlx"
 
-# 1. Speech to text
+# 1. Speech recognition
 result = mlx_whisper.transcribe(
     AUDIO,
     path_or_hf_repo=WHISPER,
@@ -19,7 +19,7 @@ print("English:", english)
 korean = translate(english)
 print("Korean:", korean)
 
-# 3. Text to speech
+# 3. Voice cloning
 subprocess.run([
     "uv", "run", "--project", "tts",
     "mlx_audio.tts.generate",
@@ -31,4 +31,4 @@ subprocess.run([
     "--output_path", "tts/output",
 ], check=True)
 
-print("Saved to tts/output/audio_000.wav")
+print("Done! Audio saved in tts/output/")
